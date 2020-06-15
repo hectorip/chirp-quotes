@@ -6,7 +6,8 @@ defmodule ChirpWeb.QuoteLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :quotes, list_quotes())}
+    if connected?(socket), do: Timeline.subscribe()
+    {:ok, assign(socket, :quotes, list_quotes()), temporary_assigns: [quotes: []]}
   end
 
   @impl true
@@ -38,6 +39,16 @@ defmodule ChirpWeb.QuoteLive.Index do
     {:ok, _} = Timeline.delete_quote(quote)
 
     {:noreply, assign(socket, :quotes, list_quotes())}
+  end
+
+  @impl true
+  def handle_info({:quote_created, quote}, socket) do
+    {:noreply, update(socket, :quotes, fn quotes -> [quote | quotes] end)}
+  end
+
+  @impl true
+  def handle_info({:quote_updated, quote}, socket) do
+    {:noreply, update(socket, :quotes, fn quotes -> [quote | quotes] end)}
   end
 
   defp list_quotes do

@@ -4,9 +4,9 @@ defmodule Chirp.Timeline.Quote do
 
   schema "quotes" do
     field :body, :string
-    field :likes_count, :integer
-    field :repost_count, :integer
-    field :username, :string
+    field :likes_count, :integer, default: 0
+    field :repost_count, :integer, default: 0
+    field :username, :string, default: "hectorip"
 
     timestamps()
   end
@@ -14,7 +14,8 @@ defmodule Chirp.Timeline.Quote do
   @doc false
   def changeset(quote, attrs) do
     quote
-    |> cast(attrs, [:username, :body, :likes_count, :repost_count])
-    |> validate_required([:username, :body, :likes_count, :repost_count])
+    |> cast(attrs, [:body])
+    |> validate_required([:body])
+    |> validate_length(:body, min: 2, max: 500)
   end
 end

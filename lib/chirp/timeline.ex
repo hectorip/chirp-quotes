@@ -18,7 +18,7 @@ defmodule Chirp.Timeline do
 
   """
   def list_quotes do
-    Repo.all(Quote)
+    Repo.all(from p in Quote, order_by: [desc: p.id])
   end
 
   @doc """
@@ -53,6 +53,7 @@ defmodule Chirp.Timeline do
     %Quote{}
     |> Quote.changeset(attrs)
     |> Repo.insert()
+    |> broadcast(:quote_created)
   end
 
   @doc """
@@ -71,6 +72,7 @@ defmodule Chirp.Timeline do
     quote
     |> Quote.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:quote_updated)
   end
 
   @doc """
@@ -100,5 +102,15 @@ defmodule Chirp.Timeline do
   """
   def change_quote(%Quote{} = quote, attrs \\ %{}) do
     Quote.changeset(quote, attrs)
+  end
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(Chirp.PubSub, "quotes")
+  end
+
+  defp broadcast({:error, _readon} = error, _event), do: error
+  defp broadcast({:ok, quote}, event) do
+    Phoenix.PubSub.broadcast(Chirp.PubSub, "quotes", {event, quote})
+    {:ok, quote}
   end
 end

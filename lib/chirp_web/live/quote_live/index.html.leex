@@ -1,4 +1,4 @@
-<h1>Listing Quotes</h1>
+<h1>Quotes Timeline</h1>
 
 <%= if @live_action in [:new, :edit] do %>
   <%= live_modal @socket, ChirpWeb.QuoteLive.FormComponent,
@@ -9,33 +9,10 @@
     return_to: Routes.quote_index_path(@socket, :index) %>
 <% end %>
 
-<table>
-  <thead>
-    <tr>
-      <th>Username</th>
-      <th>Body</th>
-      <th>Likes count</th>
-      <th>Repost count</th>
 
-      <th></th>
-    </tr>
-  </thead>
-  <tbody id="quotes">
-    <%= for quote <- @quotes do %>
-      <tr id="quote-<%= quote.id %>">
-        <td><%= quote.username %></td>
-        <td><%= quote.body %></td>
-        <td><%= quote.likes_count %></td>
-        <td><%= quote.repost_count %></td>
-
-        <td>
-          <span><%= live_redirect "Show", to: Routes.quote_show_path(@socket, :show, quote) %></span>
-          <span><%= live_patch "Edit", to: Routes.quote_index_path(@socket, :edit, quote) %></span>
-          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: quote.id, data: [confirm: "Are you sure?"] %></span>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
+  <div id="post" phx-update="prepend">
+  <%= for quote <- @quotes do %>
+    <%= live_component @socket, ChirpWeb.QuoteLive.QuoteComponent, id: quote.id, quote: quote %>
+  <% end %>
+  </div>
 <span><%= live_patch "New Quote", to: Routes.quote_index_path(@socket, :new) %></span>
